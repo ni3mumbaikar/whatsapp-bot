@@ -1,5 +1,7 @@
 import { WAConnection, MessageType, Mimetype } from "@adiwajshing/baileys";
+import { rejects } from "assert";
 import * as fs from "fs";
+import { resolve } from "path";
 
 const path = "./auth_info.json";
 var conn = null;
@@ -32,28 +34,14 @@ conn.on("qr", (qr) => {
   console.log(qr);
 });
 
-// conn.on("chat-update", async (chat) => {
-//   // if (chat !== undefined) {
-//   //   const m = chat.messages.all()[0]; // pull the new message from the update
-//   //   console.log(m);
-//   // }
-
-//   if (!chat.hasNewMessage) {
-//     if (chat.messages) {
-//       console.log("updated message: ", chat.messages.first);
-//     }
-//     return;
-//   }
-// });
-
 conn.on("chat-update", (chatUpdate) => {
   // `chatUpdate` is a partial object, containing the updated properties of the chat
   // received a new message
   if (chatUpdate.messages && chatUpdate.count) {
     const message = chatUpdate.messages.all()[0];
-    console.log(message);
-    console.log("MyMessage : " + message.message.conversation);
     if (message.message.conversation.startsWith("/")) {
+      console.log(message);
+      console.log("MyMessage : " + message.message.conversation);
       if (message.message.conversation == "/status") {
         const sentMsg = conn.sendMessage(
           message.key.remoteJid,
@@ -64,8 +52,9 @@ conn.on("chat-update", (chatUpdate) => {
         const commands =
           "  LIST OF AVAILALE COMMANDS FOR YOU  \n\n" +
           "1. */status* : To check bot is online or not\n\n" +
-          "2. */caps your_text* : To return to text in all capital letters (work in progress)\n\n" +
-          "3. */about* : To know more about me (work in progress)";
+          "2. */caps your_text* : To return to text in all capital letters \n\n" +
+          "3. */sticker* : Use /sticker as caption of any image to get it's sticker (work in progress)\n\n" +
+          "4. */about* : To know more about me (work in progress)";
         const sentMsg = conn.sendMessage(
           message.key.remoteJid,
           commands,
@@ -80,7 +69,33 @@ conn.on("chat-update", (chatUpdate) => {
           msg,
           MessageType.text
         );
+      } else if (message.message.conversation == "/about") {
+        const msg = "Ruko jara sabar karo ! Bana raha hu features :D ";
+        const sentMsg = conn.sendMessage(
+          message.key.remoteJid,
+          msg,
+          MessageType.text
+        );
+      } else if (message.message.conversation.startsWith("/sticker")) {
+        const msg = "No image found";
+        const sentMsg = conn.sendMessage(
+          message.key.remoteJid,
+          msg,
+          MessageType.text
+        );
       }
+    } else if (
+      message.message.imageMessage &&
+      message.message.imageMessage.caption &&
+      message.message.imageMessage.caption.startsWith("/sticker")
+    ) {
+      console.log("IMAGE DETECTED");
+      const msg = "IMAGE DETECTED";
+      const sentMsg = conn.sendMessage(
+        message.key.remoteJid,
+        msg,
+        MessageType.text
+      );
     }
   } //else console.log(chatUpdate); // see updates (can be archived, pinned etc.)
 });
