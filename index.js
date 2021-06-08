@@ -1,9 +1,4 @@
-import {
-  WAConnection,
-  MessageType,
-  MessageOptions,
-  Mimetypes,
-} from "@adiwajshing/baileys";
+import { WAConnection, MessageType, Mimetype } from "@adiwajshing/baileys";
 import * as fs from "fs";
 
 const path = "./auth_info.json";
@@ -56,9 +51,35 @@ conn.on("chat-update", (chatUpdate) => {
   // received a new message
   if (chatUpdate.messages && chatUpdate.count) {
     const message = chatUpdate.messages.all()[0];
-    if (message.key.remoteJid == "917208160712@s.whatsapp.net") {
-      console.log(message);
-      if (message.message == "/status" || message.message == "/help") {
+    console.log(message);
+    console.log("MyMessage : " + message.message.conversation);
+    if (message.message.conversation.startsWith("/")) {
+      if (message.message.conversation == "/status") {
+        const sentMsg = conn.sendMessage(
+          message.key.remoteJid,
+          "Aye aye captain !",
+          MessageType.text
+        );
+      } else if (message.message.conversation == "/help") {
+        const commands =
+          "  LIST OF AVAILALE COMMANDS FOR YOU  \n\n" +
+          "1. */status* : To check bot is online or not\n\n" +
+          "2. */caps your_text* : To return to text in all capital letters (work in progress)\n\n" +
+          "3. */about* : To know more about me (work in progress)";
+        const sentMsg = conn.sendMessage(
+          message.key.remoteJid,
+          commands,
+          MessageType.text
+        );
+      } else if (message.message.conversation.startsWith("/caps")) {
+        const msg = message.message.conversation
+          .toUpperCase()
+          .replace("/CAPS", " ");
+        const sentMsg = conn.sendMessage(
+          message.key.remoteJid,
+          msg,
+          MessageType.text
+        );
       }
     }
   } //else console.log(chatUpdate); // see updates (can be archived, pinned etc.)
