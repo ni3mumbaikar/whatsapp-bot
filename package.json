@@ -19,9 +19,11 @@
   },
   "homepage": "https://github.com/ni3mumbaikar/whatsapp-bot#readme",
   "dependencies": {
-    "@adiwajshing/baileys": "github:adiwajshing/baileys"
+    "@adiwajshing/baileys": "github:adiwajshing/baileys",
+    "wa-sticker-formatter": "^3.6.0"
   },
   "devDependencies": {
+    "ffmpeg": "0.0.4",
     "nodemon": "^2.0.7"
   }
 }
