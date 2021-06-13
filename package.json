@@ -20,6 +20,8 @@
   "homepage": "https://github.com/ni3mumbaikar/whatsapp-bot#readme",
   "dependencies": {
     "@adiwajshing/baileys": "github:adiwajshing/baileys",
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
+    "esm": "^3.2.25",
     "wa-sticker-formatter": "^3.6.0"
   },
   "devDependencies": {

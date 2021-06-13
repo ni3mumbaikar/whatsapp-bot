@@ -37,11 +37,11 @@ async function connectToWhatsApp() {
     // received a new message
     if (chatUpdate.messages && chatUpdate.count) {
       const message = chatUpdate.messages.all()[0];
-      if (
-        message.message.conversation &&
+      // console.log(message);
+      if ( message.message &&
+        (message.message.conversation != undefined || message.message.conversation !=null) &&
         message.message.conversation.startsWith("/")
       ) {
-        console.log(message);
         console.log("MyMessage : " + message.message.conversation);
         if (message.message.conversation == "/status") {
           const sentMsg = conn.sendMessage(
@@ -61,7 +61,7 @@ async function connectToWhatsApp() {
             commands,
             MessageType.text
           );
-        } else if (message.message.conversation.startsWith("/caps")) {
+        } else if (message.message.conversation == "/caps") {
           const msg = message.message.conversation
             .toUpperCase()
             .replace("/CAPS", " ");
@@ -77,7 +77,7 @@ async function connectToWhatsApp() {
             msg,
             MessageType.text
           );
-        } else if (message.message.conversation.startsWith("/sticker")) {
+        } else if (message.message.conversation == "/sticker") {
           const msg = "No image found";
           const sentMsg = conn.sendMessage(
             message.key.remoteJid,
@@ -88,13 +88,9 @@ async function connectToWhatsApp() {
       } else if (
         message.message.imageMessage &&
         message.message.imageMessage.caption &&
-        message.message.imageMessage.caption.startsWith("/sticker")
+        message.message.imageMessage.caption == "/sticker"
       ) {
         const buffer = await conn.downloadMediaMessage(message); // to decrypt & use as a buffer
-
-        const path = "./undefined.jpeg";
-        const path2 = "/undefined.png";
-        const path3 = "/undefined.gif";
 
         const sticker = new WSF.Sticker(buffer, {
           crop: true,
@@ -110,9 +106,24 @@ async function connectToWhatsApp() {
           sticBuffer,
           MessageType.sticker
         );
+      } else if (message.message.videoMessage && message.message.videoMessage.gifPlayback 
+        && message.message.videoMessage.caption == "/sticker"){
+        const buffer = await conn.downloadMediaMessage(message)
+        const sticker = new WSF.Sticker(buffer, {
+          crop: true,
+          animated: true,
+          pack: "hard",
+          author: "unknown",
+        });
 
-        console.log("IMAGE DETECTED");
-        const msg = "IMAGE DETECTED";
+        await sticker.build();
+        const sticBuffer = await sticker.get();
+
+        conn.sendMessage(
+          message.key.remoteJid,
+          sticBuffer,
+          MessageType.sticker
+        );
       }
     } //else console.log(chatUpdate); // see updates (can be archived, pinned etc.)
   });
