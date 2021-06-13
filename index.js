@@ -54,14 +54,14 @@ async function connectToWhatsApp() {
             "  LIST OF AVAILABLE COMMANDS FOR YOU  \n\n" +
             "1. */status* : To check this bot is online or not\n\n" +
             "2. */caps your_text* : To return back the text all chars in capital letters \n\n" +
-            "3. */sticker* : Use /sticker as caption of any image to get it's sticker (work in progress)\n\n" +
-            "4. */about* : To know more about me (work in progress)";
+            "3. */sticker* : Use /sticker as caption of any image to get it's sticker \n\n" +
+            "4. */about* : bot by ni3mumbaikar [ https://www.linkedin.com/in/ni3mumbaikar/ ]";
           const sentMsg = conn.sendMessage(
             message.key.remoteJid,
             commands,
             MessageType.text
           );
-        } else if (message.message.conversation == "/caps") {
+        } else if (message.message.conversation.startsWith("/caps")) {
           const msg = message.message.conversation
             .toUpperCase()
             .replace("/CAPS", " ");
