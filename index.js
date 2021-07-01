@@ -9,11 +9,11 @@ var conn = null;
 
 async function connectToWhatsApp() {
   try {
+    conn = new WAConnection();
     if (fs.existsSync(path)) {
-      conn = new WAConnection();
       conn.loadAuthInfo("./auth_info.json");
+      await conn.connect();
     } else {
-      conn = new WAConnection();
       // this will be called as soon as the credentials are updated
       conn.on("open", () => {
         // save credentials whenever updated
@@ -24,8 +24,8 @@ async function connectToWhatsApp() {
           JSON.stringify(authInfo, null, "\t")
         ); // save this info to a file
       });
+      await conn.connect();
     }
-    await conn.connect();
   } catch (err) {
     console.error(err);
   }
@@ -35,14 +35,26 @@ async function connectToWhatsApp() {
   conn.on("chat-update", async (chatUpdate) => {
     // `chatUpdate` is a partial object, containing the updated properties of the chat
     // received a new message
-    if (chatUpdate.messages && chatUpdate.count) {
-      const message = chatUpdate.messages.all()[0];
-      // console.log(message);
-      if ( message.message &&
-        (message.message.conversation != undefined || message.message.conversation !=null) &&
+    if (!chatUpdate.messages) {
+      return;
+    }
+    const message = chatUpdate.messages.all()[0];
+    if (
+      chatUpdate.messages &&
+      chatUpdate.count &&
+      (String(message.key.remoteJid).endsWith("1569851878@g.us") || // kalakars
+        String(message.key.remoteJid).endsWith("1582473504@g.us") || //imp stuff
+        String(message.key.remoteJid).endsWith("1455546107@g.us")) // mafiya
+    ) {
+      console.log(message);
+      if (
+        message.message &&
+        (message.message.conversation != undefined ||
+          message.message.conversation != null) &&
         message.message.conversation.startsWith("/")
       ) {
         console.log("MyMessage : " + message.message.conversation);
+        var messageType = Object.keys(message.message)[0];
         if (message.message.conversation == "/status") {
           const sentMsg = conn.sendMessage(
             message.key.remoteJid,
@@ -55,7 +67,8 @@ async function connectToWhatsApp() {
             "1. */status* : To check this bot is online or not\n\n" +
             "2. */caps your_text* : To return back the text all chars in capital letters \n\n" +
             "3. */sticker* : Use /sticker as caption of any image to get it's sticker \n\n" +
-            "4. */about* : bot by ni3mumbaikar [ https://www.linkedin.com/in/ni3mumbaikar/ ]";
+            "4. */about* : To know more about me\n\n" +
+            "*What's New*\nYou can now send /sticker as reply to any image in the group to get it's sticker";
           const sentMsg = conn.sendMessage(
             message.key.remoteJid,
             commands,
@@ -71,7 +84,8 @@ async function connectToWhatsApp() {
             MessageType.text
           );
         } else if (message.message.conversation == "/about") {
-          const msg = "Ruko jara sabar karo ! Bana raha hu features :D ";
+          const msg =
+            "bot by ni3mumbaikar [ https://www.linkedin.com/in/ni3mumbaikar/ ]";
           const sentMsg = conn.sendMessage(
             message.key.remoteJid,
             msg,
@@ -106,9 +120,12 @@ async function connectToWhatsApp() {
           sticBuffer,
           MessageType.sticker
         );
-      } else if (message.message.videoMessage && message.message.videoMessage.gifPlayback 
-        && message.message.videoMessage.caption == "/sticker"){
-        const buffer = await conn.downloadMediaMessage(message)
+      } else if (
+        message.message.videoMessage &&
+        message.message.videoMessage.gifPlayback &&
+        message.message.videoMessage.caption == "/sticker"
+      ) {
+        const buffer = await conn.downloadMediaMessage(message);
         const sticker = new WSF.Sticker(buffer, {
           crop: true,
           animated: true,
@@ -124,7 +141,35 @@ async function connectToWhatsApp() {
           sticBuffer,
           MessageType.sticker
         );
-      }
+      } //else if (
+      //   message.message.extendedTextMessage &&
+      //   message.message.extendedTextMessage.text == "/sticker" &&
+      //   (message.message.extendedTextMessage.contextInfo.quotedMessage
+      //     .imageMessage ||
+      //     (message.message.extendedTextMessage.contextInfo.quotedMessage
+      //       .videoMessage &&
+      //       message.message.extendedTextMessage.contextInfo.quotedMessage
+      //         .videoMessage.gifPlayback))
+      // ) {
+      //   console.log(message.message.extendedTextMessage.contextInfo);
+      //   const messages = await conn.loadMessages(message.key.remoteJid, 5);
+      //   console.log(messages);
+      //   // console.log("Loaded message with ID: " + ogmessage.key.id);
+      //   // const buffer = conn.downloadMediaMessage(ogmessage);
+      //   // const sticker = new WSF.Sticker(buffer, {
+      //   //   crop: true,
+      //   //   animated: false,
+      //   //   pack: "hard",
+      //   //   author: "unknown",
+      //   // });
+      //   // sticker.build();
+      //   // const sticBuffer = sticker.get();
+      //   // conn.sendMessage(
+      //   //   message.key.remoteJid,
+      //   //   sticBuffer,
+      //   //   MessageType.sticker
+      //   // );
+      // }
     } //else console.log(chatUpdate); // see updates (can be archived, pinned etc.)
   });
 }
