@@ -105,7 +105,7 @@ async function connectToWhatsApp() {
         message.message.imageMessage.caption == "/sticker"
       ) {
         const buffer = await conn.downloadMediaMessage(message); // to decrypt & use as a buffer
-
+        console.log(message);
         const sticker = new WSF.Sticker(buffer, {
           crop: true,
           animated: false,
@@ -134,6 +134,37 @@ async function connectToWhatsApp() {
         });
 
         await sticker.build();
+        const sticBuffer = sticker.get();
+
+        conn.sendMessage(
+          message.key.remoteJid,
+          sticBuffer,
+          MessageType.sticker
+        );
+      } else if (
+        message.message.extendedTextMessage &&
+        message.message.extendedTextMessage.text == "/sticker" &&
+        (message.message.extendedTextMessage.contextInfo.quotedMessage
+          .imageMessage ||
+          (message.message.extendedTextMessage.contextInfo.quotedMessage
+            .videoMessage &&
+            message.message.extendedTextMessage.contextInfo.quotedMessage
+              .videoMessage.gifPlayback))
+      ) {
+        var ogmessage = await conn.loadMessage(
+          message.key.remoteJid,
+          message.message.extendedTextMessage.contextInfo.stanzaId
+        );
+        console.log(ogmessage);
+        const buffer = await conn.downloadMediaMessage(ogmessage); // to decrypt & use as a buffer
+        console.log(ogmessage);
+        const sticker = new WSF.Sticker(buffer, {
+          crop: true,
+          animated: false,
+          pack: "hard",
+          author: "unknown",
+        });
+        await sticker.build();
         const sticBuffer = await sticker.get();
 
         conn.sendMessage(
@@ -141,35 +172,7 @@ async function connectToWhatsApp() {
           sticBuffer,
           MessageType.sticker
         );
-      } //else if (
-      //   message.message.extendedTextMessage &&
-      //   message.message.extendedTextMessage.text == "/sticker" &&
-      //   (message.message.extendedTextMessage.contextInfo.quotedMessage
-      //     .imageMessage ||
-      //     (message.message.extendedTextMessage.contextInfo.quotedMessage
-      //       .videoMessage &&
-      //       message.message.extendedTextMessage.contextInfo.quotedMessage
-      //         .videoMessage.gifPlayback))
-      // ) {
-      //   console.log(message.message.extendedTextMessage.contextInfo);
-      //   const messages = await conn.loadMessages(message.key.remoteJid, 5);
-      //   console.log(messages);
-      //   // console.log("Loaded message with ID: " + ogmessage.key.id);
-      //   // const buffer = conn.downloadMediaMessage(ogmessage);
-      //   // const sticker = new WSF.Sticker(buffer, {
-      //   //   crop: true,
-      //   //   animated: false,
-      //   //   pack: "hard",
-      //   //   author: "unknown",
-      //   // });
-      //   // sticker.build();
-      //   // const sticBuffer = sticker.get();
-      //   // conn.sendMessage(
-      //   //   message.key.remoteJid,
-      //   //   sticBuffer,
-      //   //   MessageType.sticker
-      //   // );
-      // }
+      }
     } //else console.log(chatUpdate); // see updates (can be archived, pinned etc.)
   });
 }
