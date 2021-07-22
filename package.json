@@ -22,6 +22,7 @@
     "@adiwajshing/baileys": "github:adiwajshing/baileys",
     "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "esm": "^3.2.25",
+    "mongoose": "^5.13.3",
     "wa-sticker-formatter": "^3.6.0"
   },
   "devDependencies": {

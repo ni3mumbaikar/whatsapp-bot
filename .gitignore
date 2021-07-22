@@ -4,3 +4,4 @@ node_modules
 .env* 
 *.local
 auth_info.json
+test.json
