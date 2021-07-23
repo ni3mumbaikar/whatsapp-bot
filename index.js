@@ -23,59 +23,66 @@ conn.on("chat-update", async (chatUpdate) => {
     return;
   }
   const message = chatUpdate.messages.all()[0];
-
+  var key = message.key.remoteJid; //remote id for group and personal message
   if (chatUpdate.messages && chatUpdate.count) {
-    entryExists(String(message.key.remoteJid)).then((result) => {
-      console.log(String(message.key.remoteJid));
-      // Checking if the user is in registered list
+    if (String(message.key.remoteJid).length > 27) {
+      key = key.substring(key.length - 15); //change key to group id for group messages
+    }
+    entryExists(String(key)).then((result) => {
       if (
-        //Checking it's a normal message not a reply message and starts with /
-        message.message &&
-        (message.message.conversation != undefined ||
-          message.message.conversation != null) &&
-        message.message.conversation.startsWith("/")
+        !(result.length == 0) &&
+        String(message.key.remoteJid).endsWith(result[0]["number"])
       ) {
-        commandHandler(message);
-      } else if (
-        // Check the given message is of type image and caption is /sticker or not
-        message.message &&
-        message.message.imageMessage &&
-        message.message.imageMessage.caption &&
-        message.message.imageMessage.caption == "/sticker"
-      ) {
-        stickerMaker(message, "i").catch((err) => console.log(err)); //i for image
-      } else if (
-        // Check the given message is of type image[video/gif] and caption is /sticker or not
-        message.message &&
-        message.message.videoMessage &&
-        message.message.videoMessage.gifPlayback &&
-        message.message.videoMessage.caption == "/sticker"
-      ) {
-        stickerMaker(message, "v").catch((err) => console.log(err)); // v for video or gif
-      } else if (
-        // To check original message is Image / Gif and the reply for media message is '/sticker'
-        message.message.extendedTextMessage &&
-        message.message.extendedTextMessage.text == "/sticker" &&
-        (message.message.extendedTextMessage.contextInfo.quotedMessage
-          .imageMessage ||
-          (message.message.extendedTextMessage.contextInfo.quotedMessage
-            .videoMessage &&
-            message.message.extendedTextMessage.contextInfo.quotedMessage
-              .videoMessage.gifPlayback))
-      ) {
-        var character = "i";
+        // Checking if the user is in registered list
         if (
-          //Check if it is the gif if so change argument character to 'v' otherwise it will be default 'i'
-          message.message.extendedTextMessage.contextInfo.quotedMessage
-            .videoMessage &&
-          message.message.extendedTextMessage.contextInfo.quotedMessage
-            .videoMessage.gifPlayback
+          //Checking it's a normal message not a reply message and starts with /
+          message.message &&
+          (message.message.conversation != undefined ||
+            message.message.conversation != null) &&
+          message.message.conversation.startsWith("/")
         ) {
-          character = "v";
+          commandHandler(message);
+        } else if (
+          // Check the given message is of type image and caption is /sticker or not
+          message.message &&
+          message.message.imageMessage &&
+          message.message.imageMessage.caption &&
+          message.message.imageMessage.caption == "/sticker"
+        ) {
+          stickerMaker(message, "i").catch((err) => console.log(err)); //i for image
+        } else if (
+          // Check the given message is of type image[video/gif] and caption is /sticker or not
+          message.message &&
+          message.message.videoMessage &&
+          message.message.videoMessage.gifPlayback &&
+          message.message.videoMessage.caption == "/sticker"
+        ) {
+          stickerMaker(message, "v").catch((err) => console.log(err)); // v for video or gif
+        } else if (
+          // To check original message is Image / Gif and the reply for media message is '/sticker'
+          message.message.extendedTextMessage &&
+          message.message.extendedTextMessage.text == "/sticker" &&
+          (message.message.extendedTextMessage.contextInfo.quotedMessage
+            .imageMessage ||
+            (message.message.extendedTextMessage.contextInfo.quotedMessage
+              .videoMessage &&
+              message.message.extendedTextMessage.contextInfo.quotedMessage
+                .videoMessage.gifPlayback))
+        ) {
+          var character = "i";
+          if (
+            //Check if it is the gif if so change argument character to 'v' otherwise it will be default 'i'
+            message.message.extendedTextMessage.contextInfo.quotedMessage
+              .videoMessage &&
+            message.message.extendedTextMessage.contextInfo.quotedMessage
+              .videoMessage.gifPlayback
+          ) {
+            character = "v";
+          }
+          loadMessageLocal(message).then((ogmessage) => {
+            stickerMaker(ogmessage, character);
+          });
         }
-        loadMessageLocal(message).then((ogmessage) => {
-          stickerMaker(ogmessage, character);
-        });
       }
     });
   }
