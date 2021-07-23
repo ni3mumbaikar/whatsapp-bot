@@ -41,9 +41,8 @@ conn.on("chat-update", async (chatUpdate) => {
           console.log("image detected");
           //anonymous function for asynchronus downloading
           //TODO: SOLVE BUG ASYNC PROBLEMS
-          const buffer = conn.downloadMediaMessage(message); // to decrypt & use as a buffer
           console.log("image detected2");
-          stickerMaker(message, buffer).catch((err) => console.log(err));
+          stickerMaker(message).catch((err) => console.log(err));
         }
       })
       .catch((err) => {

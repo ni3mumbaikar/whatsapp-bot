@@ -34,7 +34,8 @@ export function commandHandler(message) {
   console.log(message.message.conversation);
 }
 
-export async function stickerMaker(message, buffer) {
+export async function stickerMaker(message) {
+  const buffer = await connection.downloadMediaMessage(message); // to decrypt & use as a buffer
   console.log("image detected3");
   const stickerobj = new WSF.Sticker(buffer, {
     crop: true,
@@ -43,10 +44,11 @@ export async function stickerMaker(message, buffer) {
     author: "unknown",
   });
   await stickerobj.build();
-  const sticBuffer = await stickerobj.get().then(() => {
-    sticker(message, sticBuffer);
-    console.log("inside");
-  });
+  const sticBuffer = await stickerobj.get();
+  // sticker(message, sticBuffer);
+  sticker(message, sticBuffer);
+  console.log("inside");
+
   console.log("outside");
 }
 
@@ -74,7 +76,7 @@ function help(message) {
   );
 }
 
-function sticker(message, sticBuffer) {
+async function sticker(message, sticBuffer) {
   connection.sendMessage(
     message.key.remoteJid,
     sticBuffer,
