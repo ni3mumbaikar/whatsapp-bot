@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 export function connectToDatabase() {
   mongoose.connect(
-    "mongodb://localhost:27017/whitelist",
+    "mongodb://localhost:27017/wa-bot",
     { useNewUrlParser: true, useUnifiedTopology: true },
     () => {
       console.log("Database connected successfully ");
@@ -26,13 +26,16 @@ export function addUser(number) {
   });
 }
 
-export async function entryExists(number) {
-  // const newEntry = new WhitelistEntry();
-  await WhitelistEntry.find({ number: number }, (err, docs) => {
-    if (err) {
-      console.log("Rejected Promise " + err);
-    } else {
-      console.log("Resolved " + docs);
-    }
+//TODO : Restricted Access is not allowed here
+export function entryExists(num) {
+  return new Promise((resolve, reject) => {
+    WhitelistEntry.find({ number: num }, function (err, docs) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(docs);
+      }
+    });
+    // const newEntry = new WhitelistEntry();
   });
 }

@@ -4,9 +4,14 @@ const Schema = mongoose.Schema;
 const ObjectId = Schema.ObjectId;
 const Model = mongoose.model;
 
-const schema = new Schema({
-  uid: ObjectId,
-  number: String,
-});
+const schema = new Schema(
+  {
+    uid: { type: ObjectId },
+    number: { type: String },
+  },
+  {
+    collection: "whitelist",
+  }
+);
 
-export const WhitelistEntry = new Model("WhiteList", schema);
+export const WhitelistEntry = new Model("whitelist", schema);
