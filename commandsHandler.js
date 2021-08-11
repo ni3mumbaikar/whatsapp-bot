@@ -40,12 +40,18 @@ export async function stickerMaker(message, type, crop) {
     anim = true;
   }
 
-  const stickerobj = new WSF.Sticker(buffer, {
-    crop: crop,
+  var options = {
     animated: anim,
     pack: "hard",
     author: "unknown",
-  });
+  };
+
+  options.type = crop === true ? "crop" : "full";
+  options.crop = crop;
+
+  console.log("crop type is ", options);
+
+  const stickerobj = new WSF.Sticker(buffer, options);
   await stickerobj.build();
   const sticBuffer = await stickerobj.get();
   sticker(message, sticBuffer);
@@ -60,7 +66,7 @@ async function status(message) {
 }
 
 export async function loadMessageLocal(message) {
-  return connection.loadMessage(
+  return await connection.loadMessage(
     message.key.remoteJid,
     message.message.extendedTextMessage.contextInfo.stanzaId
   );

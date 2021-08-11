@@ -111,8 +111,11 @@ conn.on("chat-update", async (chatUpdate) => {
             ) {
               crop = true;
             }
-            loadMessageLocal(message).then((ogmessage) => {
-              stickerMaker(ogmessage, character, crop);
+            await loadMessageLocal(message).then((ogmessage) => {
+              console.log(ogmessage);
+              if (ogmessage && ogmessage.message) {
+                stickerMaker(ogmessage, character, crop);
+              }
             });
           }
         }

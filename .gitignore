@@ -5,3 +5,4 @@ node_modules
 *.local
 auth_info.json
 test.json
+.package-lock.json
