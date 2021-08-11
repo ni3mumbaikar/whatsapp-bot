@@ -32,16 +32,16 @@ export function commandHandler(message) {
   }
 }
 
-export async function stickerMaker(message, character) {
+export async function stickerMaker(message, type, crop) {
   const buffer = await connection.downloadMediaMessage(message); // to decrypt & use as a buffer
 
   var anim = false;
-  if (character === "v") {
+  if (type === "v") {
     anim = true;
   }
 
   const stickerobj = new WSF.Sticker(buffer, {
-    crop: true,
+    crop: crop,
     animated: anim,
     pack: "hard",
     author: "unknown",
@@ -69,11 +69,12 @@ export async function loadMessageLocal(message) {
 function help(message) {
   const commands =
     "*AVAILABLE COMMANDS*\n\n" +
-    "1. */status* : To check this bot is online or not\n\n" +
-    "2. */caps your_text* : To return back the text all chars in capital letters \n\n" +
-    "3. */sticker* : Use /sticker as caption of any image to get it's sticker \n\n" +
-    "4. */about* : To know more about me\n\n" +
-    "\n*What's New*\n\n - You can now send /sticker as reply to any image in the group to get it's sticker";
+    "1. */status* : To check this bot is online or not  🟢 \n\n" +
+    "2. */caps your_text* : To return back the text all chars in capital letters  🔼 \n\n" +
+    "3. */sticker* : Use /sticker as caption of any image to get it's sticker 🌆\n\n " +
+    "4. */about* : To know more about me 💻\n\n" +
+    "\n*What's New*\n\n - You can now send /sticker as reply to any image in the group to get it's sticker ◀️\n\n" +
+    "- Stickers stretching/squezzing solved use /sticker to get non stretchy full res stickers 😸 use /sticker crop to get cropped version";
   const sentMsg = connection.sendMessage(
     message.key.remoteJid,
     commands,

@@ -1,6 +1,7 @@
 import { WhitelistEntry } from "./db-whitelist_model.js";
 import mongoose from "mongoose";
 
+// Make Initial Database Connection
 export function connectToDatabase() {
   mongoose.connect(
     "mongodb://localhost:27017/wa-bot",
@@ -11,6 +12,7 @@ export function connectToDatabase() {
   );
 }
 
+// Add new user by Admin account
 export function addUser(number) {
   return new Promise((resolve, reject) => {
     const newEntry = new WhitelistEntry();
@@ -25,8 +27,6 @@ export function addUser(number) {
       });
   });
 }
-
-//TODO : Restricted Access is not allowed here
 export function entryExists(num) {
   return new Promise((resolve, reject) => {
     WhitelistEntry.find({ number: num }, function (err, docs) {
@@ -36,6 +36,5 @@ export function entryExists(num) {
         resolve(docs);
       }
     });
-    // const newEntry = new WhitelistEntry();
   });
 }

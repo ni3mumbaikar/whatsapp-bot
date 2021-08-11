@@ -1,5 +1,3 @@
-import { WAConnection, MessageType, Mimetype } from "@adiwajshing/baileys";
-import { rejects } from "assert";
 import { connectToWhatsApp, connection } from "./wa-connection.js";
 import { entryExists, connectToDatabase } from "./db-operate-database.js";
 import {
@@ -28,6 +26,7 @@ conn.on("chat-update", async (chatUpdate) => {
     if (String(message.key.remoteJid).length > 27) {
       key = key.substring(key.length - 15); //change key to group id for group messages
     }
+    // TODO: FIX CROP PARAMETER
     entryExists(String(key)).then((result) => {
       if (
         !(result.length == 0) &&
@@ -43,25 +42,41 @@ conn.on("chat-update", async (chatUpdate) => {
         ) {
           commandHandler(message);
         } else if (
-          // Check the given message is of type image and caption is /sticker or not
+          // Check the given message is of type image and caption starts with /sticker or not
           message.message &&
           message.message.imageMessage &&
           message.message.imageMessage.caption &&
-          message.message.imageMessage.caption == "/sticker"
+          String(message.message.imageMessage.caption).startsWith("/sticker")
         ) {
-          stickerMaker(message, "i").catch((err) => console.log(err)); //i for image
+          //crop is checking the parameter is crop if yes then crop else create sticker as it is
+          var crop = false;
+          if (
+            String(message.message.imageMessage.caption).trim() ===
+            "/sticker crop"
+          ) {
+            crop = true;
+          }
+          stickerMaker(message, "i", crop).catch((err) => console.log(err)); //i for image
         } else if (
           // Check the given message is of type image[video/gif] and caption is /sticker or not
           message.message &&
           message.message.videoMessage &&
           message.message.videoMessage.gifPlayback &&
-          message.message.videoMessage.caption == "/sticker"
+          String(message.message.videoMessage.caption).startsWith("/sticker")
         ) {
-          stickerMaker(message, "v").catch((err) => console.log(err)); // v for video or gif
+          var crop = false;
+          if (
+            String(message.message.videoMessage.caption) === "/sticker crop"
+          ) {
+            crop = true;
+          }
+          stickerMaker(message, "v", crop).catch((err) => console.log(err)); // v for video or gif
         } else if (
           // To check original message is Image / Gif and the reply for media message is '/sticker'
           message.message.extendedTextMessage &&
-          message.message.extendedTextMessage.text == "/sticker" &&
+          String(message.message.extendedTextMessage.text).startsWith(
+            "/sticker"
+          ) &&
           (message.message.extendedTextMessage.contextInfo.quotedMessage
             .imageMessage ||
             (message.message.extendedTextMessage.contextInfo.quotedMessage
@@ -69,19 +84,37 @@ conn.on("chat-update", async (chatUpdate) => {
               message.message.extendedTextMessage.contextInfo.quotedMessage
                 .videoMessage.gifPlayback))
         ) {
-          var character = "i";
           if (
-            //Check if it is the gif if so change argument character to 'v' otherwise it will be default 'i'
-            message.message.extendedTextMessage.contextInfo.quotedMessage
-              .videoMessage &&
-            message.message.extendedTextMessage.contextInfo.quotedMessage
-              .videoMessage.gifPlayback
+            String(message.message.extendedTextMessage.text) ===
+              "/sticker crop" ||
+            String(message.message.extendedTextMessage.text) === "/sticker"
           ) {
-            character = "v";
+            var character = "i";
+            var crop = false;
+            if (
+              /*Check if it is the gif if so change argument character to 'v' otherwise it will be default 'i'
+            setting it v will enable animation parameter which will result in moving stickers
+            */ message.message &&
+              message.message.extendedTextMessage &&
+              message.message.extendedTextMessage.contextInfo.quotedMessage
+                .videoMessage &&
+              message.message.extendedTextMessage.contextInfo.quotedMessage
+                .videoMessage.gifPlayback
+            ) {
+              character = "v";
+            }
+            if (
+              message.message &&
+              message.message.extendedTextMessage &&
+              String(message.message.extendedTextMessage.text) ===
+                "/sticker crop"
+            ) {
+              crop = true;
+            }
+            loadMessageLocal(message).then((ogmessage) => {
+              stickerMaker(ogmessage, character, crop);
+            });
           }
-          loadMessageLocal(message).then((ogmessage) => {
-            stickerMaker(ogmessage, character);
-          });
         }
       }
     });
