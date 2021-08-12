@@ -66,7 +66,7 @@ async function status(message) {
 }
 
 export async function loadMessageLocal(message) {
-  return connection.loadMessage(
+  return await connection.loadMessage(
     message.key.remoteJid,
     message.message.extendedTextMessage.contextInfo.stanzaId
   );
