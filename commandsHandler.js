@@ -35,6 +35,8 @@ export function commandHandler(message) {
 export async function stickerMaker(message, type, crop) {
   const buffer = await connection.downloadMediaMessage(message); // to decrypt & use as a buffer
 
+  console.log(typof buffer)
+
   var anim = false;
   if (type === "v") {
     anim = true;
@@ -44,6 +46,7 @@ export async function stickerMaker(message, type, crop) {
     animated: anim,
     pack: "hard",
     author: "unknown",
+    quality: 50,
   };
 
   options.type = crop === true ? "crop" : "full";
